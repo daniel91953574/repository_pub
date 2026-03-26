@@ -1,3 +1,5 @@
+#VERSÃO CONCLUIDA
+#autor: Daniel de Oliveira Leal
 fazendo função Quaz(i) de forma explicita e com erros removidos;
 
 Qx(a,b,c,d):
@@ -90,7 +92,7 @@ SE (w=1,fn=0): #w--
  se (a>=0 & b>=0 & c>=0 & d>=0): Quaw_{w,fn}(Quaw_{w,fn}(Quaw_{w-1,fn}}(2^256,2^256,2^256,2^256),Quaw_{w-1,fn}}(2^256,2^256,2^256,2^256),Quaw_{w-1,fn}(2^256,2^256,2^256,2^256),d-1),Quaw_{w,fn}(Quaw_{w-1,fn}(2^256,2^256,2^256,2^256),Quaw_{w-1,fn}(2^256,2^256,2^256,2^256),Quaw_{w-1,fn}}(2^256,2^256,2^256,2^256),d-1),Quaw_{w,fn}(Quaw_{w-1,fn}(2^256,2^256,2^256,2^256),Quaw_{w-1,fn}(2^256,2^256,2^256,2^256),Quaw_{w-1,fn}(2^256,2^256,2^256,2^256),d-1),d-1)
 
 SE (w=1,fn>0): #fn--
- Quaw_{w}(a,b,c,d):
+ Quaw_{w,fn}(a,b,c,d):
  se (a==0 & b==0 & c==0 & d==0): Quaw_{w,fn-1}(2^256,2^256,2^256,2^256)
  se (a>=0 & b==0 & c==0 & d==0): Quaw_{w,fn}(a-1,0,0,0)
  se (a>=0 & b>=0 & c==0 & d==0): Quaw_{w,fn}(Quaw_w(Quaw_{w,fn-1}(2^256,2^256,2^256,2^256),b-1,c,d),b-1,0,0)
