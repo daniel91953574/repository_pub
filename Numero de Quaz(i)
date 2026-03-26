@@ -1,4 +1,4 @@
-fazendo função Quaz(i) de forma explicita, chame de Quazilhões os i-ésimos valores desta função;
+fazendo função Quaz(i) de forma explicita e com erros removidos;
 
 Qa(a,b,c,d):
  se (a==0 & b==0 & c==0 & d==0): 2^256
@@ -9,7 +9,7 @@ Qa(a,b,c,d):
 
 SE w=1:
  Q_1(a,b,c,d):
- se (a==0 & b==0 & c==0 & d==0): 2^256
+ se (a==0 & b==0 & c==0 & d==0): Qa(2^256,2^256,2^256,2^256)
  se (a>=0 & b==0 & c==0 & d==0): Q_w(a-1,b,c,d)
  se (a>=0 & b>=0 & c==0 & d==0): Q_w(Q_w(a,b-1,c,d),b-1,c,d)
  se (a>=0 & b>=0 & c>=0 & d==0): Q_w(Q_w(a,b,c-1,d),Q_w(a,b,c-1,d),c-1,d)
@@ -26,7 +26,7 @@ SE w>1:
 #Quax_i(a,b,c,d):
 SE w=1:
  Quax_1(a,b,c,d):
- se (a==0 & b==0 & c==0 & d==0): 2^256
+ se (a==0 & b==0 & c==0 & d==0): Q_{Q_{2^256}(2^256,2^256,2^256,2^256)}(2^256,2^256,2^256,2^256)
  se (a>=0 & b==0 & c==0 & d==0): Quax_w(a-1,b,c,d)
  se (a>=0 & b>=0 & c==0 & d==0): Quax_w(Quax_w(a,b-1,c,d),b-1,c,d)
  se (a>=0 & b>=0 & c>=0 & d==0): Quax_w(Quax_w(a,b,c-1,d),Quax_w(a,b,c-1,d),c-1,d)
@@ -42,7 +42,7 @@ SE w>1:
 #Quay_i(a,b,c,d):
 SE w=1:
  Quay_1(a,b,c,d):
- se (a==0 & b==0 & c==0 & d==0): 2^256
+ se (a==0 & b==0 & c==0 & d==0): Quax_{Quax_{2^256}(2^256,2^256,2^256,2^256)}(2^256,2^256,2^256,2^256)
  se (a>=0 & b==0 & c==0 & d==0): Quay_w(a-1,b,c,d)
  se (a>=0 & b>=0 & c==0 & d==0): Quay_w(Quay_i(a,b-1,c,d),b-1,c,d)
  se (a>=0 & b>=0 & c>=0 & d==0): Quay_w(Quay_w(a,b,c-1,d),Quay_w(a,b,c-1,d),c-1,d)
@@ -58,7 +58,7 @@ SE w>1:
 #Quaz_i(a,b,c,d):
 SE w=1:
  Quaz_1(a,b,c,d):
- se (a==0 & b==0 & c==0 & d==0): 2^256
+ se (a==0 & b==0 & c==0 & d==0): Quay_{Quay_{2^256}(2^256,2^256,2^256,2^256)}(2^256,2^256,2^256,2^256)
  se (a>=0 & b==0 & c==0 & d==0): Quaz_w(a-1,b,c,d)
  se (a>=0 & b>=0 & c==0 & d==0): Quaz_w(Qa(a,b-1,c,d),b-1,c,d)
  se (a>=0 & b>=0 & c>=0 & d==0): Quaz_w(Qa(a,b,c-1,d),Quaz_w(a,b,c-1,d),c-1,d)
@@ -73,3 +73,4 @@ SE w>1:
 
 #RESULTADO:
 Quaz(i) == Quaz_{w=i}(i,i,i,i)
+
