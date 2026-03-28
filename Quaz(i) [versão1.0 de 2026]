@@ -1,6 +1,15 @@
 #VERSÃO CONCLUIDA
 #autor: Daniel de Oliveira Leal
-fazendo função Quaz(i) de forma explicita e com erros removidos;
+#criação: rascunho em 2024, mas versão atualizada 26 Março 2026;
+#Descrição:
+ fazendo função Quaz(i) de forma explicita,
+ sem funções de terceiros, ao invés de fazer modificação na função de Graham, passei a usar a função Qx & Q_w como operações primitivas, possuem poder expressivo superior a função G(64) (ou sua modificada G(m,n,o,p)),
+ "Quav(n-1,m)" equivale e foi substituido pelas recursões sobrepostas em {a,b,c,d}
+ a recursão m é analogo ao papel de w, mas agora deixou de ser '+1)*2'
+ substitui operação de knuth_up_arrow(a,b,n) pelo acumulador "n^" presente em todas fases de calculo,
+ é matematicamente óbvio a superioridade do uso de "n^Q_{w-1}" ao invés do mesmo operador (w cresce com função atual);
+ foram removidos erros (e omissões) e ambiguidades (má definições);
+#---
 
 Qx(n,a,b,c,d):
  se (a==0 & b==0 & c==0 & d==0): n^2^256
