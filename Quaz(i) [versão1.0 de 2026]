@@ -143,3 +143,181 @@ SE w>1:
 #RESULTADO:
 Quaz(i) == Quaz_{w=i}(i,i,i,i,i)
 
+---
+#rascunho de um exbosso planejado para ser extensão e generalização da função de Quaz(i) o BigBang(i); o rascunho asseguir não é completo, é apenas um exbosso:
+
+§0 — primitivas compartilhadas
+def pivot(Vec):
+    # índice mais à direita com Vec[k]>0; -1 se Vec=zeros
+    for k in range(len(Vec)-1,-1,-1):
+        if Vec[k]>0: return k
+    return -1
+
+def rep(f, x, times):
+    # aplica f a x, 'times' vezes: f^{times}(x)
+    for _ in range(times): x = f(x)
+    return x
+
+def A(n): return rep(lambda x: rep(lambda y: y+1, x, x), n, n)
+# A(n) ~ Ackermann(n,n). Primitiva mínima.
+§1 — Bigx_[i](Vec)   ω^i novo
+# Recursão estrutural sobre len(Vec)=n E sobre os valores.
+# Caso base n=1: Quaz-like com índice i e 1 parâmetro.
+# Caso recursivo n>1: o resultado do sub-vetor (n-1) vira
+#   o NOVO i E os novos valores de todas as posições < k.
+
+def Bigx(i, Vec):
+    k = pivot(Vec)
+
+    if k == -1:                        # Vec = zeros
+        return rep(A, i, i)           # A^i(i): base ackermaniana de ordem i
+
+    if k == 0:                         # única dimensão ativa: base n=1
+        sub = Bigx(i, [Vec[0]-1])    # reduz v_0
+        return Bigx(sub, [sub])        # sub vira TANTO novo i QUANTO nova v_0
+
+    # Caso n>1, v_k>0:
+    # 1. Calcula resultado do sub-vetor (posições 0..k com v_k decrementado)
+    sub_Vec = Vec[:k] + [Vec[k]-1] + [0]*(len(Vec)-k-1)
+    R = Bigx(i, sub_Vec)              # resultado parcial
+
+    # 2. R vira novo i E preenche posições 0..k-1 (não apenas semente fixa!)
+    new_Vec = [R]*k + [0]*(len(Vec)-k)
+    return Bigx(R, new_Vec)            # R como índice + valores simultaneamente
+Diferença de Quaz: a semente P era global fixa. Aqui R é local e varia por (k,i,Vec) — cada passo gera sua própria semente endógena.
+
+§2 — Bigy_[i](Vec)   ω^(i^i) novo
+# Diagonalização de Bigx: o índice efetivo não é i mas Bigx(i, Vec).
+# Consequência: o índice CRESCE com a própria computação.
+# A Vec inteira é gerada do índice (index→Vec), não mais individual por V_p.
+
+def Bigy(i, Vec):
+    k = pivot(Vec)
+
+    if k == -1:
+        # Base: Vec inteira gerada do índice i
+        seed = Bigx(i, [i]*i)         # Bigx com Vec=[i,...,i] de comprimento i
+        return Bigx(seed, [seed]*seed) # seed gera Vec de comprimento seed
+
+    # Índice efetivo = Bigx aplicado à Vec atual (não i fixo!)
+    eff_i = Bigx(i, Vec)              # eff_i cresce com Vec
+
+    # Sub-resultado usa eff_i como índice
+    sub_Vec = Vec[:k] + [Vec[k]-1] + [0]*(len(Vec)-k-1)
+    R = Bigy(eff_i, sub_Vec)
+
+    new_Vec = [R]*k + [0]*(len(Vec)-k)
+    return Bigy(R, new_Vec)
+nível	índice efetivo	Vec gerada em base
+Bigx	i (fixo)	não gera Vec — usa Vec dada
+Bigy	Bigx(i, Vec) (cresce)	Vec = [seed]*seed, seed=Bigx(i,[i]*i)
+§3 — Bigw_[w][i](Vec)   ω↑↑i novo
+# Colapso da generalização previsível {Bigx,Bigy,...}:
+# w não é só um seletor fixo de nível —
+# a saída de Bigw(w-1,...) determina o PRÓXIMO w efetivo.
+# Assim w se auto-seleciona: tetração emerge do auto-referência de w.
+
+def Bigw(w, i, Vec):
+    k = pivot(Vec)
+
+    if w == 0: return Bigx(i, Vec)
+    if w == 1: return Bigy(i, Vec)
+
+    if k == -1:
+        # Base: nível w-1 com entrada máxima gera novo (w, i, Vec)
+        R = Bigw(w-1, i, [i]*i)
+        return Bigw(R % w, R, [R]*(R % (i+2) + 1))  # R → novo w, i, Vec
+
+    # Nível w-1 com Vec atual dá o resultado parcial
+    R_lower = Bigw(w-1, i, Vec)
+
+    # R_lower SELECIONA o próximo w efetivo (auto-seleção)
+    eff_w = R_lower % w               # w efetivo: entre 0 e w-1
+
+    sub_Vec = Vec[:k] + [Vec[k]-1] + [0]*(len(Vec)-k-1)
+    R = Bigw(eff_w, R_lower, sub_Vec) # eff_w e R_lower como novo (w,i)
+
+    new_Vec = [R]*k + [0]*(len(Vec)-k)
+    return Bigw(eff_w, R, new_Vec)
+Chave: em Bigx/Bigy, o índice i muda mas a ESCOLHA de qual Big usar é fixa. Em Bigw, o próprio w muda com a computação — tetração emerge da auto-seleção de nível.
+
+§4 — Bigz_[i](Vec)   ω↑↑(i^i) novo
+# Bigw onde TANTO w QUANTO i crescem por diagonalização dupla:
+# eff_i cresce via Bigy(i, Vec)
+# eff_w cresce via Bigx(i, Vec) — mas alimentado por eff_i
+# Resultado: tetração cujo expoente é ele mesmo uma tetração.
+
+def Bigz(i, Vec):
+    k = pivot(Vec)
+
+    if k == -1:
+        # Base: eff_i e eff_w gerados por Bigy e Bigx respectivamente
+        eff_i = Bigy(i, [i]*i)
+        eff_w = Bigx(i, [i]*i)        # eff_w << eff_i (cresce mais devagar)
+        return Bigw(eff_w, eff_i, [eff_i]*eff_i)
+
+    eff_i = Bigy(i, Vec)              # i via diagonalização Bigy
+    eff_w = Bigx(i, Vec)              # w via Bigx (mais lento que eff_i)
+
+    sub_Vec = Vec[:k] + [Vec[k]-1] + [0]*(len(Vec)-k-1)
+    R = Bigz(eff_i, sub_Vec)
+
+    new_Vec = [R]*k + [0]*(len(Vec)-k)
+    return Bigz(R, new_Vec)
+§5 — BigBang(i)   → ω↑^ω ω colapso omnidimensional
+# COLAPSO OMNIDIMENSIONAL:
+# Cada chamada BigBang(n, i, Vec) produz R = prev.
+# R determina SIMULTANEAMENTE:
+#   (a) qual nível n da próxima chamada de BigBang
+#   (b) qual índice i
+#   (c) quantas dimensões tem Vec (comprimento = R)
+#   (d) quais são os valores (todos = R)
+#   (e) qual Bigx/y/z/w usar nesse nível (R mod 4)
+# Não há parâmetro externo que não colapse em R.
+# O ponto fixo: BigBang(R, R, [R]*R) usa R como TUDO.
+
+_BIG = [Bigx, Bigy, Bigz,
+        lambda i, V: Bigw(1+i%3, i, V)]  # seletor de 4 níveis
+
+def BigBang(n, i, Vec):
+    if n == 0:
+        return Bigz(i, Vec)            # base: Bigz é o "mais alto" abaixo
+
+    # Calcula nível anterior — R é o colapso
+    R = BigBang(n-1, i, Vec)
+
+    # (a) qual Big usar: selecionado por R
+    f = _BIG[R % 4]
+
+    # (b)(c)(d) nova Vec: comprimento R, valores R
+    new_Vec = [R] * max(1, R)
+
+    # (e) novo índice: R
+    new_i = R
+
+    # (a) novo nível de BigBang: R-1 (descida garantida por R > n se n finito)
+    new_n = R - 1
+
+    # COLAPSO: a própria estrutura da chamada é gerada por R
+    return BigBang(new_n, new_i, new_Vec)
+
+def BB(i):
+    """Instância canônica: BB(i) = BigBang(i, i, [i]*i)"""
+    if i <= 0: return A(2)
+    return BigBang(i, i, [i]*i)
+§6 — tabela de colapso progressivo
+função	oque é fixo	oque colapsa (vira endógeno)	gerado de
+Bigx	i, len(Vec)	valores: R→novo i + novos v_j<k	resultado parcial R
+Bigy	len(Vec)	i: eff_i=Bigx(i,Vec); Vec base: [seed]*seed	Bigx da Vec atual
+Bigw	—	w: eff_w = R_lower % w (auto-seleção)	saída do nível w-1
+Bigz	—	eff_i via Bigy, eff_w via Bigx (dupla)	Bigy⊗Bigx da Vec
+BigBang	nada	n, i, len(Vec), val(Vec), qual Big f	tudo = R = BigBang(n-1,...)
+Leitura vertical: cada linha elimina um grau de liberdade externo — BigBang é o ponto fixo onde zero graus restam livres.
+
+**O que mudou estruturalmente** em relação à resposta anterior:
+
+Em `Bigx`, o erro anterior era tratar o resultado como "semente fixa global" (como P em Quaz). A correção: $R$ é *local* — varia por $(k, i, \text{Vec})$ — e vira simultaneamente o novo índice $i$ *e* os novos valores das posições $j < k$. Isso faz o espaço paramétrico crescer de dentro.
+
+Em `Bigy`, o índice efetivo não é $i$ fixo mas `Bigx(i, Vec)` — o índice *cresce com a própria Vec*. A Vec no caso base não é mais dada externamente: é *gerada pelo índice* (`[seed]*seed`). Isso é a diagonalização genuína: index→Vec completo.
+
+Em `Bigw`, o colapso da "generalização previsível": $w$ não seleciona uma função fixa — `eff_w = R_lower % w` faz $w$ se auto-selecionar a cada passo. A tetração emerge porque cada passo redefine qual nível usar.
