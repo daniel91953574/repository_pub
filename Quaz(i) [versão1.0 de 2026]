@@ -12,7 +12,7 @@
 #---
 
 Qx(n,a,b,c,d):
- se (a==0 & b==0 & c==0 & d==0): n^2^256
+ se (a==0 & b==0 & c==0 & d==0): P#(n^2^256) ///essa é uma função de conversão primorial
  se (a>=0 & b==0 & c==0 & d==0): n^Qx(Qx(n,a-1,b,c,d),a-1,b,c,d)
  se (a>=0 & b>=0 & c==0 & d==0): n^Qx(Qx(n,a,b-1,c,d),Qx(n,a,b-1,c,d),b-1,c,d)
  se (a>=0 & b>=0 & c>=0 & d==0): n^Qx(Qx(n,a,b,c-1,d),Qx(n,a,b,c-1,d),Qx(n,a,b,c-1,d),c-1,d)
@@ -160,7 +160,7 @@ def rep(f, x, times):
 
 def A(n): return rep(lambda x: rep(lambda y: y+1, x, x), n, n)
 # A(n) ~ Ackermann(n,n). Primitiva mínima.
-§1 — Bigx_[i](Vec)   ω^i novo
+§1 — Bigx_[i](Vec)   ⊕^FGHω^i novo
 # Recursão estrutural sobre len(Vec)=n E sobre os valores.
 # Caso base n=1: Quaz-like com índice i e 1 parâmetro.
 # Caso recursivo n>1: o resultado do sub-vetor (n-1) vira
@@ -186,7 +186,7 @@ def Bigx(i, Vec):
     return Bigx(R, new_Vec)            # R como índice + valores simultaneamente
 Diferença de Quaz: a semente P era global fixa. Aqui R é local e varia por (k,i,Vec) — cada passo gera sua própria semente endógena.
 
-§2 — Bigy_[i](Vec)   ω^(i^i) novo
+§2 — Bigy_[i](Vec)   ⊕^FGHω^(i^i) novo
 # Diagonalização de Bigx: o índice efetivo não é i mas Bigx(i, Vec).
 # Consequência: o índice CRESCE com a própria computação.
 # A Vec inteira é gerada do índice (index→Vec), não mais individual por V_p.
@@ -211,7 +211,8 @@ def Bigy(i, Vec):
 nível	índice efetivo	Vec gerada em base
 Bigx	i (fixo)	não gera Vec — usa Vec dada
 Bigy	Bigx(i, Vec) (cresce)	Vec = [seed]*seed, seed=Bigx(i,[i]*i)
-§3 — Bigw_[w][i](Vec)   ω↑↑i novo
+
+§3 — Bigw_[w][i](Vec)   ⊕^FGHω↑↑i novo
 # Colapso da generalização previsível {Bigx,Bigy,...}:
 # w não é só um seletor fixo de nível —
 # a saída de Bigw(w-1,...) determina o PRÓXIMO w efetivo.
@@ -241,7 +242,7 @@ def Bigw(w, i, Vec):
     return Bigw(eff_w, R, new_Vec)
 Chave: em Bigx/Bigy, o índice i muda mas a ESCOLHA de qual Big usar é fixa. Em Bigw, o próprio w muda com a computação — tetração emerge da auto-seleção de nível.
 
-§4 — Bigz_[i](Vec)   ω↑↑(i^i) novo
+§4 — Bigz_[i](Vec)   ⊕^FGHω↑↑(i^i) novo
 # Bigw onde TANTO w QUANTO i crescem por diagonalização dupla:
 # eff_i cresce via Bigy(i, Vec)
 # eff_w cresce via Bigx(i, Vec) — mas alimentado por eff_i
@@ -264,7 +265,8 @@ def Bigz(i, Vec):
 
     new_Vec = [R]*k + [0]*(len(Vec)-k)
     return Bigz(R, new_Vec)
-§5 — BigBang(i)   → ω↑^ω ω colapso omnidimensional
+
+§5 — BigBang(i)   → ⊕^FGHω↑^ω ω colapso omnidimensional
 # COLAPSO OMNIDIMENSIONAL:
 # Cada chamada BigBang(n, i, Vec) produz R = prev.
 # R determina SIMULTANEAMENTE:
@@ -305,6 +307,7 @@ def BB(i):
     """Instância canônica: BB(i) = BigBang(i, i, [i]*i)"""
     if i <= 0: return A(2)
     return BigBang(i, i, [i]*i)
+
 §6 — tabela de colapso progressivo
 função	oque é fixo	oque colapsa (vira endógeno)	gerado de
 Bigx	i, len(Vec)	valores: R→novo i + novos v_j<k	resultado parcial R
