@@ -1807,27 +1807,31 @@ def asm_to_asmx(src: str) -> str:
 # NASM RUNNER
 # ─────────────────────────────────────────────────────────────────────────────
 def find_nasm() -> str:
-    for cand in ["nasm", "nasm.exe",
-                 "./nasm/nasm.exe", "./nasm/nasm",
-                 "nasm/nasm.exe",
-                 "../nasm/nasm.exe"]:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        "nasm", "nasm.exe",
+        os.path.join(script_dir, "nasm", "nasm.exe"),
+        os.path.join(script_dir, "nasm.exe"),
+        "./nasm/nasm.exe", "nasm/nasm.exe"
+    ]
+    for cand in candidates:
         found = shutil.which(cand)
-        if found:
-            return found
-        if os.path.isfile(cand):
-            return os.path.abspath(cand)
+        if found: return found
+        if os.path.isfile(cand): return os.path.abspath(cand)
     return "nasm"
 
 def find_golink() -> str:
-    for cand in ["GoLink", "GoLink.exe",
-                 "./nasm/GoLink.exe", "./nasm/GoLink",
-                 "nasm/GoLink.exe",
-                 "../nasm/GoLink.exe"]:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        "GoLink", "GoLink.exe",
+        os.path.join(script_dir, "nasm", "GoLink.exe"),
+        os.path.join(script_dir, "GoLink.exe"),
+        "./nasm/GoLink.exe", "nasm/GoLink.exe"
+    ]
+    for cand in candidates:
         found = shutil.which(cand)
-        if found:
-            return found
-        if os.path.isfile(cand):
-            return os.path.abspath(cand)
+        if found: return found
+        if os.path.isfile(cand): return os.path.abspath(cand)
     return "GoLink"
 
 @dataclass
@@ -1855,6 +1859,15 @@ def run_nasm(source_text: str, mode: str, source_path: Optional[str] = None) -> 
     """
     Modes: bin | obj_win64 | obj_elf64 | exe_win64 | bios | uefi
     """
+    result = BuildResult(mode=mode)
+    
+    # Se o arquivo for .ptx, não compilamos com NASM, pois a GPU compila JIT
+    if source_path and source_path.lower().endswith(".ptx"):
+        result.ok = True
+        result.log = "Arquivo .ptx detectado. O código PTX é compilado nativamente (JIT) pelo driver da NVIDIA (nvcuda.dll) em tempo de execução!\nNão é necessária compilação prévia."
+        result.output_file = source_path
+        return result
+
     nasm = find_nasm()
     golink = find_golink()
     tmp = tempfile.mkdtemp(prefix="nasmed_")
@@ -3303,8 +3316,16 @@ class NasmEditor:
         self.build_mode = mode
         self.status_msg = f"Compilando [{mode.upper()}]..."
         self.status_color = T["warn_fg"]
-        # ASMX → NASM antes de enviar ao assembler
+        # Correção de sintaxe: expandir ` | ` para novas linhas (evita erro do NASM)
         raw_source = self.editor.get_text()
+        fixed_source = []
+        for line in raw_source.split('\n'):
+            if ' | ' in line and not line.strip().startswith(';'):
+                line = line.replace(' | ', '\n    ')
+            fixed_source.append(line)
+        raw_source = '\n'.join(fixed_source)
+        
+        # ASMX → NASM antes de enviar ao assembler
         try:
             source = asmx_to_asm(raw_source)
         except Exception as e:
